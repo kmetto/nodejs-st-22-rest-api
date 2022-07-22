@@ -24,8 +24,12 @@ export class UsersService {
     return selectedUsers;
   }
 
-  findOne(id: string) {
-    const selectedUser = this.users.find((user) => user.id === id) ?? null;
+  findOne(
+    selector: string,
+    { selectorType }: { selectorType: 'id' | 'login' },
+  ) {
+    const selectedUser =
+      this.users.find((user) => user[selectorType] === selector) ?? null;
 
     if (selectedUser?.isDeleted) return null;
 
@@ -44,7 +48,7 @@ export class UsersService {
   }
 
   updateOne(id: string, updateUserDto: UpdateUserDto) {
-    const updatedUser = this.findOne(id);
+    const updatedUser = this.findOne(id, { selectorType: 'id' });
 
     if (updatedUser === null) return null;
 
@@ -56,7 +60,7 @@ export class UsersService {
   }
 
   deleteOne(id: string) {
-    const deletedUser = this.findOne(id);
+    const deletedUser = this.findOne(id, { selectorType: 'id' });
 
     if (deletedUser === null) return null;
 

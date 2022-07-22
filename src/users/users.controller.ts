@@ -47,7 +47,9 @@ export class UsersController {
     @Body(CustomValidationPipe)
     createUserDto: CreateUserDto,
   ) {
-    this.validateLogin(createUserDto.login);
+    this.validateLogin(createUserDto.login, undefined, {
+      passUnchangedLogin: false,
+    });
 
     const newUser = this.usersService.createOne(createUserDto);
     return newUser;
@@ -58,7 +60,7 @@ export class UsersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body(CustomValidationPipe) updateUserDto: UpdateUserDto,
   ) {
-    this.validateLogin(updateUserDto.login);
+    this.validateLogin(updateUserDto.login, id, { passUnchangedLogin: true });
 
     const updatedUser = this.usersService.updateOne(id, updateUserDto);
 
@@ -76,15 +78,20 @@ export class UsersController {
     return deletedUser;
   }
 
-  private validateLogin(login: string) {
-    const isLoginInUse = Boolean(
-      this.usersService.findOne(login, {
-        selectorType: 'login',
-      }),
-    );
+  private validateLogin(
+    newLogin: string,
+    currentId = '',
+    { passUnchangedLogin }: { passUnchangedLogin: boolean },
+  ) {
+    const userByLogin = this.usersService.findOne(newLogin, {
+      selectorType: 'login',
+    });
 
-    if (isLoginInUse) {
-      throw new BadRequestException('The suggested login is already in use');
-    }
+    if (userByLogin === null) return;
+
+    const isLoginStayedSame = userByLogin?.id === currentId;
+    if (passUnchangedLogin && isLoginStayedSame) return;
+
+    throw new BadRequestException('The suggested login is already in use');
   }
 }

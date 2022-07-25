@@ -1,12 +1,4 @@
-import {
-  Min,
-  Max,
-  IsString,
-  Matches,
-  MinLength,
-  IsInt,
-  IsBoolean,
-} from 'class-validator';
+import { Min, Max, IsString, Matches, MinLength, IsInt } from 'class-validator';
 
 export class UpdateUserDto {
   @IsString()
@@ -22,7 +14,4 @@ export class UpdateUserDto {
   @Min(4)
   @Max(130)
   age: number;
-
-  @IsBoolean()
-  isDeleted: boolean;
 }

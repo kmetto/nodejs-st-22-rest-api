@@ -6,7 +6,6 @@ import {
   Post,
   Put,
   NotFoundException,
-  BadRequestException,
   Query,
   Body,
   DefaultValuePipe,
@@ -38,6 +37,7 @@ export class UsersController {
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const user = await this.usersService.findOneById(id);
+    if (!user) throw new NotFoundException();
     return user;
   }
 

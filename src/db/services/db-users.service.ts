@@ -3,6 +3,7 @@ import {
   BadRequestException,
   BadGatewayException,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
@@ -20,7 +21,7 @@ export class DbUsers {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  private catchPrismaError(error: { code: string }): never {
+  private catchPrismaError(error: unknown): never {
     if (error instanceof Prisma.PrismaClientRustPanicError) {
       process.exit(1);
     } else if (error instanceof Prisma.PrismaClientValidationError) {
@@ -28,10 +29,15 @@ export class DbUsers {
         `Attempt to use invalid value in database.`,
       );
     } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2002') {
-        throw new BadRequestException('Unique constraint failed.');
-      } else {
-        throw new BadGatewayException('Database related error occurred.');
+      switch (error.code) {
+        case 'P2002':
+          throw new BadRequestException('Unique constraint failed.');
+        case 'P2025':
+          throw new NotFoundException(
+            'One or more records that were required but not found.',
+          );
+        default:
+          throw new BadGatewayException('Database related error occurred.');
       }
     } else {
       throw new InternalServerErrorException();

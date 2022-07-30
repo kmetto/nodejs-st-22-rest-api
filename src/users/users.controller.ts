@@ -15,7 +15,6 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { CustomValidationPipe } from './pipes/custom-validation.pipe';
 
 @Controller('users')
 export class UsersController {
@@ -43,7 +42,7 @@ export class UsersController {
 
   @Post()
   async createOne(
-    @Body(CustomValidationPipe)
+    @Body()
     createUserDto: CreateUserDto,
   ) {
     const newUser = await this.usersService.create(createUserDto);
@@ -53,7 +52,7 @@ export class UsersController {
   @Put(':id')
   async updateOne(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body(CustomValidationPipe) updateUserDto: UpdateUserDto,
+    @Body() updateUserDto: UpdateUserDto,
   ) {
     const updatedUser = await this.usersService.updateById(id, updateUserDto);
     return updatedUser;
